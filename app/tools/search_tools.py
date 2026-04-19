@@ -3,11 +3,14 @@ import os
 import httpx
 from dotenv import load_dotenv
 
-load_dotenv
+load_dotenv()
 logger = logging.getLogger(__name__)
 
 
-def search_web(query: str, num_results: int = 5) -> list[dict]:
+http_client = httpx.AsyncClient(timeout=10.0)
+
+
+async def search_web(query: str, num_results: int = 5) -> list[dict]:
     """
     Searches the web using Serper API (Google Search).
     Use for current events, news, general knowledge questions,
@@ -21,15 +24,16 @@ def search_web(query: str, num_results: int = 5) -> list[dict]:
         list[dict]: Search results with title, link, snippet
     """
     try:
-        response = httpx.post(
+        response = await http_client.post(
             "https://google.serper.dev/search",
             headers={
                 "X-API-KEY": os.getenv("SERPER_API_KEY"),
                 "Content-Type": "application/json",
             },
             json={"q": query, "num": num_results},
-            timeout=10.0,
         )
+        response.raise_for_status()
+
         data = response.json()
         results = []
         for item in data.get("organic", []):
@@ -40,14 +44,16 @@ def search_web(query: str, num_results: int = 5) -> list[dict]:
                     "snippet": item.get("snippet"),
                 }
             )
+
         logger.info(f"search_web({query}) returned {len(results)} results")
         return results
+    
     except Exception as e:
         logger.error(f"search_web error: {e}")
         return []
 
 
-def get_weather(city: str) -> dict:
+async def get_weather(city: str) -> dict:
     """
     Gets current weather for a city.
     Use when user asks about weather.
@@ -59,18 +65,20 @@ def get_weather(city: str) -> dict:
         dict: Temperature, condition, humidity
     """
     try:
-        response = httpx.get(
+        response = await http_client.get(
             "https://api.openweathermap.org/data/2.5/weather",
             params={
                 "q": city,
                 "appid": os.getenv("OPENWEATHER_API_KEY"),
                 "units": "metric",
             },
-            timeout=10.0,
         )
+        response.raise_for_status()
+
         data = response.json()
         if data.get("cod") != 200:
             return {"error": f"City not found: {city}"}
+        
         return {
             "city": city,
             "temperature": data["main"]["temp"],
@@ -78,12 +86,13 @@ def get_weather(city: str) -> dict:
             "condition": data["weather"][0]["description"],
             "humidity": data["main"]["humidity"],
         }
+    
     except Exception as e:
         logger.error(f"get_weather error: {e}")
         return {"error": str(e)}
 
 
-def get_news(topic: str, num_articles: int = 5) -> list[dict]:
+async def get_news(topic: str, num_articles: int = 5) -> list[dict]:
     """
     Gets latest news articles on a topic.
     Use when user asks about current events or news.
@@ -96,7 +105,7 @@ def get_news(topic: str, num_articles: int = 5) -> list[dict]:
         list[dict]: Articles with title, description, url, publishedAt
     """
     try:
-        response = httpx.get(
+        response = await http_client.get(
             "https://newsapi.org/v2/everything",
             params={
                 "q": topic,
@@ -105,8 +114,9 @@ def get_news(topic: str, num_articles: int = 5) -> list[dict]:
                 "sortBy": "publishedAt",
                 "language": "en",
             },
-            timeout=10.0,
         )
+        response.raise_for_status()
+
         data = response.json()
         articles = []
         for article in data.get("articles", []):
@@ -118,8 +128,10 @@ def get_news(topic: str, num_articles: int = 5) -> list[dict]:
                     "published": article.get("publishedAt"),
                 }
             )
+
         logger.info(f"get_news({topic}) returned {len(articles)} articles")
         return articles
+    
     except Exception as e:
         logger.error(f"get_news error: {e}")
         return []
