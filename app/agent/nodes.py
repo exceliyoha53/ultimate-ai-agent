@@ -94,35 +94,35 @@ async def recall_fact_tool(session_id: str, key: str) -> dict:
 
 
 @tool
-def search_jobs_tool(location: str, limit: int = 5) -> list:
+async def search_jobs_tool(location: str, limit: int = 5) -> list:
     """
     Search Nigerian job listings by city or region.
     Use when user asks about jobs in a specific location like Lagos or Abuja.
     """
     if JOBS_AVAILABLE:
-        return _search_jobs(location, limit)
+        return await _search_jobs(location, limit)
     return [{"error": "Job database not available"}]
 
 
 @tool
-def get_latest_jobs_tool(limit: int = 5) -> list:
+async def get_latest_jobs_tool(limit: int = 5) -> list:
     """
     Get the most recently scraped Nigerian job listings.
     Use when user asks for latest jobs without specifying a location.
     """
     if JOBS_AVAILABLE:
-        return _get_latest_jobs(limit)
+        return await _get_latest_jobs(limit)
     return [{"error": "Job database not available"}]
 
 
 @tool
-def get_jobs_by_keyword_tool(keyword: str, limit: int = 10) -> list:
+async def get_jobs_by_keyword_tool(keyword: str, limit: int = 10) -> list:
     """
     Search Nigerian jobs by job title keyword.
     Use when user asks for a specific type of job like engineer, manager, or analyst.
     """
     if JOBS_AVAILABLE:
-        return _get_jobs_by_keyword(keyword, limit)
+        return await _get_jobs_by_keyword(keyword, limit)
     return [{"error": "Job database not available"}]
 
 
@@ -260,7 +260,7 @@ async def tools_node(state: AgentState) -> AgentState:
     }
 
 
-async def response_node(state: AgentState) -> AgentState:
+async def respond_node(state: AgentState) -> AgentState:
     """
     LangGraph node — extracts the final text response and saves to Redis.
     After all tool calls complete, Gemini gives a final text response.

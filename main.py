@@ -3,6 +3,7 @@ import sys
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 from app.api.routes import router
 from app.memory.redis_memory import redis_client
@@ -51,8 +52,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
 app.include_router(router)
+
 
 
 @app.get("/health")

@@ -1,12 +1,13 @@
 import json
 import os
 import logging
-from datetime import datetime, UTC
+from datetime import datetime, timezone
 import redis.asyncio as redis
 from dotenv import load_dotenv
 
 load_dotenv()
 logger = logging.getLogger(__name__)
+UTC = timezone.utc
 
 # connect to Redis — stores all conversation memory
 redis_client = redis.from_url(

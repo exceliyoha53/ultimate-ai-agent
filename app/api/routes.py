@@ -1,8 +1,9 @@
 import logging
 import os
 import asyncio
-from fastapi import APIRouter, HTTPException, BackgroundTasks
-from fastapi.responses import FileResponse
+from fastapi import APIRouter, HTTPException, BackgroundTasks, Request
+from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from app.agent.graph import agent_graph
 from app.agent.state import AgentState
@@ -10,6 +11,7 @@ from app.memory.redis_memory import clear_session, get_history, get_all_memories
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
+templates = Jinja2Templates(directory="app/templates")
 
 
 class ChatRequest(BaseModel):
@@ -38,6 +40,12 @@ class ChatResponse(BaseModel):
     session_id: str
     audio_url: str | None = None
     tools_used: list = []
+
+
+@router.get("/", response_class=HTMLResponse)
+async def index(request: Request):
+    """Serves the main chat interface."""
+    return templates.TemplateResponse(request=request, name="index.html")
 
 
 @router.post("/chat", response_model=ChatResponse)
