@@ -275,12 +275,23 @@ async def respond_node(state: AgentState) -> AgentState:
     """
     # find last AI msg with actual context
     final_text = ""
+    
+    # Find the last AI message with actual content
     for msg in reversed(state["messages"]):
         if isinstance(msg, AIMessage) and msg.content:
-            final_text = msg.content
+            # FIX: Check if content is a list (Gemini structured output) or string
+            if isinstance(msg.content, list):
+                # Extract only text parts from the list
+                final_text = "".join([
+                    part.get("text", "") 
+                    for part in msg.content 
+                    if isinstance(part, dict) and part.get("type") == "text"
+                ])
+            else:
+                final_text = msg.content
             break
 
-    # save to redis history
+    # Save to Redis history
     await save_message(state["session_id"], "user", state["user_message"])
     await save_message(state["session_id"], "assistant", final_text)
 

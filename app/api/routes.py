@@ -75,7 +75,7 @@ async def chat(request: ChatRequest, background_tasks: BackgroundTasks) -> ChatR
         }
 
         # run the agent graph
-        final_state = await agent_graph.invoke(initial_state)
+        final_state = await agent_graph.ainvoke(initial_state)
 
         # build response
         audio_url = None
