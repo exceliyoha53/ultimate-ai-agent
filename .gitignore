@@ -32,3 +32,4 @@ logs/
 *.sqlite
 
 generated_audio
+test_email.py

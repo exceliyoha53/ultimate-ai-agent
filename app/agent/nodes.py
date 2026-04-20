@@ -1,6 +1,7 @@
 import logging
 import sys
 import os
+import asyncio
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, ToolMessage
 from langchain_core.tools import tool
@@ -17,6 +18,28 @@ from app.voice.tts import text_to_speech
 load_dotenv()
 logger = logging.getLogger(__name__)
 
+
+
+async def call_llm_with_backoff(llm_call, *args, retries=3, initial_delay=1):
+    """
+    Wraps LLM calls to handle 503/429 rate limiting gracefully.
+    Wait time doubles after each failure (Exponential Backoff).
+    """
+    delay = initial_delay
+    for i in range(retries):
+        try:
+            return await llm_call(*args)
+        except Exception as e:
+            # Check if this is a rate limit or server error
+            if "503" in str(e) or "429" in str(e):
+                if i == retries - 1:
+                    raise # If out of retries, fail
+                
+                logger.warning(f"Rate limit hit. Retrying in {delay}s... (Attempt {i+1}/{retries})")
+                await asyncio.sleep(delay)
+                delay *= 2 # Exponentially increase wait time
+            else:
+                raise # If it's a different error (e.g., auth), fail immediately
 # --- JOB TOOLS CHECK ---
 
 
@@ -143,6 +166,8 @@ llm = ChatGoogleGenerativeAI(
     model="gemini-2.5-flash",
     google_api_key=os.getenv("GOOGLE_API_KEY"),
     temperature=0.7,  # controls randomness or creativity of the models response
+    max_retries=5,
+    request_timeout=30
 ).bind_tools(ALL_TOOLS)
 
 SYSTEM_PROMPT = """
@@ -214,7 +239,12 @@ async def agent_node(state: AgentState) -> AgentState:
         AgentState: Updated with LLM response appended to messages
     """
     logger.info("Agent node: invoking LLM")
-    response = await llm.ainvoke(state["messages"])
+    try:
+        response = await call_llm_with_backoff(llm.ainvoke, state["messages"])
+    except Exception as e:
+        logger.error(f"Main model failed: {e}. Trying fallback...")
+        return {**state, "messages": state["messages"] + [AIMessage(content="I'm currently having trouble connecting to my brain. Please try again in a moment.")]}
+    
     return {**state, "messages": state["messages"] + [response]}
 
 
