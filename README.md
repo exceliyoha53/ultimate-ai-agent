@@ -18,7 +18,7 @@ graph TD
     B --> C{Gemini 2.5 Flash}
     C -->|Reasoning & Tool Selection| D[Tool Execution Nodes]
     
-    subgraph Integrated Tools
+    subgraph Tools [Integrated Tools]
         T1[Web Search]
         T2[Nigerian Jobs Vault]
         T3[Weather & News]
@@ -27,8 +27,8 @@ graph TD
         T6[Voice Gen]
     end
     
-    D --> Integrated Tools
-    Integrated Tools --> E[(Redis Persistent State)]
+    D --> Tools
+    Tools --> E[(Redis Persistent State)]
     E --> F[Text Response + MP3 Audio]
 ```
 
@@ -71,8 +71,8 @@ LangChain abstracts too much, burying the underlying logic in layers that freque
 ### 1. Clone & Environment (Windows PowerShell)
 
 ```powershell
-git clone [https://github.com/YOUR_USERNAME/ultimate-agent](https://github.com/YOUR_USERNAME/ultimate-agent)
-cd ultimate-agent
+git clone https://github.com/exceliyoha53/ultimate-ai-agent
+cd ultimate-ai-agent
 
 # Create and activate virtual environment
 python -m venv venv
@@ -106,7 +106,7 @@ Navigate to `http://localhost:8000` to access the chat interface and memory dash
 
 ---
 
-## 📝 Engineering Notes & Post-Mortem
+##  Engineering Notes & Post-Mortem
 
 ### Blocking the Event Loop (The `psycopg2` Trap)
 **The Problem:** `psycopg2` is a synchronous library. When integrated into an asynchronous FastAPI endpoint to query the job vault, database calls block the entire async event loop, causing severe performance bottlenecks.
