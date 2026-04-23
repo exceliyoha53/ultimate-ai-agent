@@ -1,14 +1,14 @@
-# 🧠 Ultimate AI Agent
+#  Ultimate AI Agent
 
 > A production-grade AI agent featuring persistent cross-session memory, web search, email automation, and integrated Nigerian job intelligence. Built on LangGraph to deliver deterministic, stateful execution.
 
 ---
 
-## ⚡ What Makes This Different?
+##  What Makes This Different?
 
 Most AI chatbots suffer from amnesia—they forget who you are the moment you close the tab. **This agent remembers.** By utilizing Redis as a memory backend, the agent persists user preferences, job profiles, and facts across sessions. Tell it your name and career goals once, and it will recall them in every future conversation. A built-in memory sidebar provides full transparency into exactly what the agent knows about you.
 
-## 🏗 Architecture
+##  Architecture
 
 The system relies on explicit state management rather than abstracted chains, ensuring reliable tool execution and memory retrieval.
 
@@ -32,7 +32,7 @@ graph TD
     E --> F[Text Response + MP3 Audio]
 ```
 
-## 🛠 Tool Ecosystem
+##  Tool Ecosystem
 
 The agent dynamically selects from the following capabilities based on the conversation context:
 
@@ -47,11 +47,11 @@ The agent dynamically selects from the following capabilities based on the conve
 | `recall_fact` | Injects stored user preferences back into the active context. |
 | `text_to_speech` | Synthesizes the final text response into downloadable MP3 audio. |
 
-## 🧠 Why LangGraph Over LangChain?
+##  Why LangGraph Over LangChain?
 
 LangChain abstracts too much, burying the underlying logic in layers that frequently break in production. **LangGraph** hands back control. It allows you to define the agent as an explicit state machine, dictating exactly what happens at each node and edge. It prioritizes practical execution, clean structure, and reliable engineering over "black box" magic.
 
-## 💻 Tech Stack
+##  Tech Stack
 
 * **Orchestration:** LangGraph (State machine architecture)
 * **Intelligence:** Gemini 2.5 Flash (Reasoning & tool selection)
@@ -62,7 +62,7 @@ LangChain abstracts too much, burying the underlying logic in layers that freque
 
 ---
 
-## 🚀 Setup & Installation
+##  Setup & Installation
 
 ### Prerequisites
 * Python 3.10+
